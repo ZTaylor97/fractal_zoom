@@ -27,16 +27,19 @@ var<uniform> uniforms: Uniforms;
 
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
-    let zoom = pow(0.8, uniforms.time);
-    let center = vec2<f32>(-0.95, -0.26); // classic Mandelbrot center
-    let uv = (vertex_out.uv - vec2<f32>(0.5)) * 3.0 * zoom + center;
+    let zoom = pow(0.85, uniforms.time);
+    // let center = vec2(-0.97, -0.252);
+    let center = vec2(-1.006, -0.25);
+    let uv = (vertex_out.uv - vec2(0.5)) * zoom;
+
+    // Instead of adding center, subtract it to bring it to (0,0)
+    let c = uv + center;
 
 
     var z = vec2<f32>(0.0);
-    var c = uv;
     var i = 0u;
 
-    let max_iter = u32(100.0 + uniforms.time * 10.0); // increases over time
+    let max_iter = u32(100.0 + uniforms.time * 10.0); 
 
     loop {
         if (i >= max_iter || dot(z, z) > 4.0) {
@@ -51,5 +54,5 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
 
     let t = f32(i) / f32(max_iter);
 
-    return vec4<f32>(t, t * 0.5, t * cos(uniforms.time) * 0.3, 1.0);
+    return vec4<f32>(t*0.6 * cos(uniforms.time * 0.05), t * sin(uniforms.time * 0.01) * 0.6, t * cos(uniforms.time * 0.03) * 0.5 + 0.02, 1.0);
 }
