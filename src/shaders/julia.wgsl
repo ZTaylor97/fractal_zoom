@@ -1,5 +1,3 @@
-// mandelbrot.wgsl
-
 struct VertexIn {
     @location(0) position: vec2<f32>,
     @location(1) uv: vec2<f32>,
@@ -17,31 +15,40 @@ fn vs_main(in: VertexIn) -> VertexOut {
     out.uv = in.uv;
     return out;
 }
-
 struct Uniforms {
     time: f32,
-}
-
+};
 @group(0) @binding(0)
 var<uniform> uniforms: Uniforms;
 
+
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
-    let c = vec2(-0.7 * sin(uniforms.time),0.27015 * cos(uniforms.time));
+    // Map UV from [0, 1] to [-1.5, 1.5] and [-1.0, 1.0]
+    let z = vec2<f32>(
+        mix(-1.5, 1.5, vertex_out.uv.x),
+        mix(-1.0, 1.0, vertex_out.uv.y)
+    );
 
-    var z = vec2<f32>(0.0);
+    // Animate 'c' using uniforms.time (c = constant for Julia)
+    let c = vec2<f32>(
+        0.7885 * cos(uniforms.time * 0.05),
+        0.7885 * sin(uniforms.time * 0.05)
+    );
+
+    var value = z;
     var i = 0u;
     loop {
-        if (i >= 255u || dot(z, z) > 4.0) {
+        if (i >= 255u || dot(value, value) > 4.0) {
             break;
         }
-        z = vec2<f32>(
-            z.x * z.x - z.y * z.y + c.x,
-            2.0 * z.x * z.y + c.y
+        value = vec2<f32>(
+            value.x * value.x - value.y * value.y + c.x,
+            2.0 * value.x * value.y + c.y
         );
         i = i + 1u;
     }
 
     let t = f32(i) / 255.0;
-    return vec4<f32>(t, t * 0.8, t * 0.1, 1.0);
+    return vec4<f32>(t * 0.9, t * 0.3, t, 1.0);
 }

@@ -27,7 +27,7 @@ var<uniform> uniforms: Uniforms;
 
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
-    let zoom = pow(0.85, uniforms.time);
+    let zoom = pow(0.7, uniforms.time);
     // let center = vec2(-0.97, -0.252);
     let center = vec2(-1.006, -0.25);
     let uv = (vertex_out.uv - vec2(0.5)) * zoom;

@@ -191,7 +191,6 @@ impl ApplicationHandler for App<'_> {
             }
             WindowEvent::RedrawRequested => {
                 if let Some(state) = self.state.as_mut() {
-                    println!("Drawing");
                     state.draw();
                     self.window.as_ref().unwrap().request_redraw();
                 }
