@@ -1,4 +1,6 @@
+use core::time;
 use std::sync::Arc;
+use std::time::Instant;
 
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
@@ -8,6 +10,7 @@ use winit::window::{Window, WindowId};
 
 mod quad;
 mod shader;
+mod uniforms;
 mod vertex;
 
 use quad::Quad;
@@ -22,11 +25,13 @@ pub struct State<'a> {
     config: wgpu::SurfaceConfiguration,
     quad: Quad,
     shader_bundle: ShaderBundle,
+    start_time: Instant,
 }
 
 impl<'a> State<'a> {
     pub async fn new(window: Arc<Window>) -> State<'a> {
         let instance = wgpu::Instance::default();
+        let start_time = Instant::now();
 
         let surface = instance.create_surface(Arc::clone(&window)).unwrap();
         let adapter = instance
@@ -77,6 +82,7 @@ impl<'a> State<'a> {
             config,
             quad,
             shader_bundle,
+            start_time,
         }
     }
 
@@ -88,7 +94,7 @@ impl<'a> State<'a> {
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         let frame = match self.surface.get_current_texture() {
             Ok(frame) => frame,
             Err(e) => {
@@ -100,6 +106,14 @@ impl<'a> State<'a> {
         let view = frame
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
+
+        let elapsed = self.start_time.elapsed();
+        let time_secs = elapsed.as_secs_f32();
+
+        self.shader_bundle.uniforms.update(time_secs);
+        self.shader_bundle
+            .uniforms
+            .write_to_gpu(&self.queue, &self.shader_bundle.uniform_buffer);
 
         let mut encoder = self
             .device
@@ -124,6 +138,7 @@ impl<'a> State<'a> {
             });
 
             rpass.set_pipeline(&self.shader_bundle.pipeline);
+            rpass.set_bind_group(0, &self.shader_bundle.uniform_bind_group, &[]);
 
             rpass.set_vertex_buffer(0, self.quad.vertex_buffer.slice(..));
             rpass.set_index_buffer(self.quad.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
@@ -175,9 +190,10 @@ impl ApplicationHandler for App<'_> {
                 }
             }
             WindowEvent::RedrawRequested => {
-                if let Some(state) = self.state.as_ref() {
-                    println!("draw requested");
+                if let Some(state) = self.state.as_mut() {
+                    println!("Drawing");
                     state.draw();
+                    self.window.as_ref().unwrap().request_redraw();
                 }
             }
             _ => {}
