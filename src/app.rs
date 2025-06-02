@@ -22,7 +22,6 @@ pub struct App<'a> {
 
 impl ApplicationHandler for App<'_> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        println!("App resumed");
         if self.window.is_none() {
             let window = Arc::new(
                 event_loop

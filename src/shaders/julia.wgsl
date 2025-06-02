@@ -17,6 +17,8 @@ fn vs_main(in: VertexIn) -> VertexOut {
 }
 struct Uniforms {
     time: f32,
+    zoom: f32,
+    offset: vec2<f32>,
 };
 @group(0) @binding(0)
 var<uniform> uniforms: Uniforms;
@@ -25,9 +27,12 @@ var<uniform> uniforms: Uniforms;
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
     // Map UV from [0, 1] to [-1.5, 1.5] and [-1.0, 1.0]
+    let bound_x = 1.5 / uniforms.zoom;
+    let bound_y = 1.5 / uniforms.zoom;
+
     let z = vec2<f32>(
-        mix(-1.5, 1.5, vertex_out.uv.x),
-        mix(-1.0, 1.0, vertex_out.uv.y)
+        mix(-bound_x + uniforms.offset.x, bound_x + uniforms.offset.x, vertex_out.uv.x),
+        mix(-bound_y + uniforms.offset.y, bound_y + uniforms.offset.y, vertex_out.uv.y)
     );
 
     // Animate 'c' using uniforms.time (c = constant for Julia)
@@ -44,11 +49,11 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
         }
         value = vec2<f32>(
             value.x * value.x - value.y * value.y + c.x,
-            2.0 * value.x * value.y + c.y
+            2 * value.x * value.y + c.y
         );
         i = i + 1u;
     }
 
     let t = f32(i) / 255.0;
-    return vec4<f32>(t * 0.9, t * 0.3, t, 1.0);
+    return vec4<f32>(t * 0.9 * sin(uniforms.time * 0.05), t * 0.3, t, 1.0);
 }

@@ -4,11 +4,17 @@ use wgpu::{BindGroupLayout, util::DeviceExt};
 #[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Uniforms {
     pub time: f32,
+    pub zoom: f32,
+    pub offset: [f32; 2],
 }
 
 impl Uniforms {
     pub fn new() -> Self {
-        Self { time: 0.0 }
+        Self {
+            time: 0.0,
+            zoom: 1.0,
+            offset: [0.0, 0.0],
+        }
     }
 
     pub fn update(&mut self, t: f32) {

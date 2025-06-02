@@ -20,6 +20,8 @@ fn vs_main(in: VertexIn) -> VertexOut {
 
 struct Uniforms {
     time: f32,
+    zoom: f32,
+    offset: vec2<f32>,
 }
 
 @group(0) @binding(0)
@@ -27,9 +29,9 @@ var<uniform> uniforms: Uniforms;
 
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
-    let zoom = pow(0.7, uniforms.time);
+    let zoom = pow(0.8, -25* cos(uniforms.time * 0.05)+ 20);
     // let center = vec2(-0.97, -0.252);
-    let center = vec2(-1.006, -0.25);
+    let center = vec2(-1.006, -0.2506);
     let uv = (vertex_out.uv - vec2(0.5)) * zoom;
 
     // Instead of adding center, subtract it to bring it to (0,0)
@@ -39,7 +41,7 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
     var z = vec2<f32>(0.0);
     var i = 0u;
 
-    let max_iter = u32(100.0 + uniforms.time * 10.0); 
+    let max_iter = u32(1000); 
 
     loop {
         if (i >= max_iter || dot(z, z) > 4.0) {
@@ -54,5 +56,5 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
 
     let t = f32(i) / f32(max_iter);
 
-    return vec4<f32>(t*0.6 * cos(uniforms.time * 0.05), t * sin(uniforms.time * 0.01) * 0.6, t * cos(uniforms.time * 0.03) * 0.5 + 0.02, 1.0);
+    return vec4<f32>(t*0.9 * sin(uniforms.time * 0.05), t * 0.3, t, 1.0);
 }
