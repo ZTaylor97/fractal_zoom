@@ -46,7 +46,7 @@ impl Quad {
         Self {
             vertex_buffer,
             index_buffer,
-            index_count: 6,
+            index_count: INDICES.len() as u32,
             vertex_buffer_layout: Vertex::desc(),
         }
     }
