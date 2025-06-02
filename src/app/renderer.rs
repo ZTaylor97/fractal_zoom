@@ -34,9 +34,12 @@ impl Renderer {
     }
 
     pub fn draw(&self, render_pass: &mut RenderPass) {
+        // set shader
         render_pass.set_pipeline(&self.shader_bundle.pipeline);
+        // set buffers
         render_pass.set_bind_group(0, &self.shader_bundle.uniform_bind_group, &[]);
 
+        // Draw the quad
         render_pass.set_vertex_buffer(0, self.quad.vertex_buffer.slice(..));
         render_pass.set_index_buffer(self.quad.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
         render_pass.draw_indexed(0..self.quad.index_count, 0, 0..1);

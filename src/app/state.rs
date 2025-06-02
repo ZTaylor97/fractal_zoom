@@ -1,14 +1,9 @@
 use std::sync::Arc;
-use std::time::Instant;
 
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
-use crate::app::renderer;
-
-use super::quad::Quad;
 use super::renderer::Renderer;
-use super::shader::ShaderBundle;
 pub struct State<'a> {
     instance: wgpu::Instance,
     surface: wgpu::Surface<'a>,
@@ -18,8 +13,9 @@ pub struct State<'a> {
     config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
 }
-
+/// Holds all wgpu state.
 impl<'a> State<'a> {
+    /// Create and initialise State objects from a winit window.
     pub async fn new(window: Arc<Window>) -> State<'a> {
         let instance = wgpu::Instance::default();
 
@@ -43,8 +39,6 @@ impl<'a> State<'a> {
             })
             .await
             .unwrap();
-
-        let quad = Quad::new(&device);
 
         let size = window.inner_size();
         let surface_caps = surface.get_capabilities(&adapter);
