@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use winit::dpi::PhysicalSize;
 use winit::window::Window;
@@ -12,6 +13,11 @@ pub struct State<'a> {
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
+    pub paused: bool,
+    start_time: Instant,
+    last_frame_time: Instant,
+    paused_time: Duration,
+    zoom: f32,
 }
 /// Holds all wgpu state.
 impl<'a> State<'a> {
@@ -56,6 +62,10 @@ impl<'a> State<'a> {
         surface.configure(&device, &config);
 
         let renderer = Renderer::new(&device, &surface_format);
+        let now = Instant::now();
+        let start_time = now;
+        let paused_time = Duration::ZERO;
+        let last_frame_time = now;
 
         Self {
             instance,
@@ -65,6 +75,11 @@ impl<'a> State<'a> {
             queue,
             config,
             renderer,
+            paused: false,
+            start_time,
+            last_frame_time,
+            paused_time,
+            zoom: 1.0,
         }
     }
 
@@ -77,7 +92,19 @@ impl<'a> State<'a> {
     }
 
     pub fn draw(&mut self) {
-        self.renderer.update(&mut self.queue);
+        let now = Instant::now();
+
+        if self.paused {
+            self.paused_time += now - self.last_frame_time;
+        }
+
+        self.last_frame_time = now;
+
+        let elapsed = now - self.start_time - self.paused_time;
+        let time_secs = elapsed.as_secs_f32();
+
+        self.renderer
+            .update(&mut self.queue, time_secs, self.zoom, [0.0, 0.0]);
 
         let frame = match self.surface.get_current_texture() {
             Ok(frame) => frame,

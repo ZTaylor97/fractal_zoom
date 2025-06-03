@@ -17,8 +17,10 @@ impl Uniforms {
         }
     }
 
-    pub fn update(&mut self, t: f32) {
+    pub fn update(&mut self, t: f32, zoom: f32, offset: [f32; 2]) {
         self.time = t;
+        self.zoom = zoom;
+        self.offset = offset;
     }
 
     pub fn create_buffer(&self, device: &wgpu::Device) -> wgpu::Buffer {

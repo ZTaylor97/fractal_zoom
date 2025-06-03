@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use winit::application::ApplicationHandler;
-use winit::event::WindowEvent;
+use winit::event::{self, ElementState, KeyEvent, MouseButton, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
+use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{Window, WindowId};
 
 mod quad;
@@ -58,6 +59,32 @@ impl ApplicationHandler for App<'_> {
                     self.window.as_ref().unwrap().request_redraw();
                 }
             }
+            WindowEvent::KeyboardInput {
+                event:
+                    KeyEvent {
+                        physical_key: PhysicalKey::Code(key),
+                        state,
+                        ..
+                    },
+                ..
+            } => {
+                if let Some(app_state) = self.state.as_mut() {
+                    match (key, state) {
+                        (KeyCode::Space, ElementState::Pressed) => {
+                            app_state.paused = true;
+                        }
+                        (KeyCode::Space, ElementState::Released) => {
+                            app_state.paused = false;
+                        }
+                        _ => (),
+                    }
+                }
+            }
+            WindowEvent::MouseInput {
+                state: ElementState::Pressed,
+                button: MouseButton::Left,
+                ..
+            } => if let Some(app_state) = self.state.as_mut() {},
             _ => {}
         }
     }

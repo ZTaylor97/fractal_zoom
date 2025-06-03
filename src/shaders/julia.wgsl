@@ -23,6 +23,33 @@ struct Uniforms {
 @group(0) @binding(0)
 var<uniform> uniforms: Uniforms;
 
+fn get_colour( intensity: f32) -> vec3<f32> {
+   let t0: f32 = 0.0;
+   let t1: f32 = 0.25;
+   let t2: f32 = 0.50;
+   let t3: f32 = 0.75;
+   let t4: f32 = 1.0;
+
+    let c0 = vec3(0.0, 0.0, 0.0);
+    let c1 = vec3(0.2, 0.0, 0.6);
+    let c2 = vec3(0.8, 0.2, 0.1);
+    let c3 = vec3(1.0, 0.8, 0.1);
+    let c4 = vec3(1.0, 1.0, 0.5);
+
+    if (intensity < t1){
+        return mix(c0, c1, (intensity - t0) / (t1 - t0));
+    }
+    else if (intensity < t2) {
+        return mix(c1, c2, (intensity - t1) / (t2 - t1));
+    }
+    else if (intensity < t3){
+        return mix(c2, c3, (intensity - t2) / (t3 - t2));
+    }
+    else {
+        return mix(c3, c4, (intensity - t3) / (t4 - t3));
+    }
+}
+
 
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
@@ -35,7 +62,6 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
         mix(-bound_y + uniforms.offset.y, bound_y + uniforms.offset.y, vertex_out.uv.y)
     );
 
-    // Animate 'c' using uniforms.time (c = constant for Julia)
     let c = vec2<f32>(
         0.7885 * cos(uniforms.time * 0.05),
         0.7885 * sin(uniforms.time * 0.05)
@@ -54,6 +80,10 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
         i = i + 1u;
     }
 
-    let t = f32(i) / 255.0;
-    return vec4<f32>(t * 0.9 * sin(uniforms.time * 0.05), t * 0.3, t, 1.0);
+
+    var t = f32(i) - log2(log2(dot(value,value))) + 4;
+    t = clamp(t / f32(255.0), 0.0, 1.0);
+
+    let colour = get_colour(t);
+    return vec4<f32>(colour, 1.0);
 }

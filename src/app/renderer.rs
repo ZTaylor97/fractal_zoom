@@ -7,27 +7,29 @@ use super::{quad::Quad, shader::ShaderBundle};
 pub struct Renderer {
     quad: Quad,
     shader_bundle: ShaderBundle,
-    start_time: Instant,
 }
 
 impl Renderer {
     pub fn new(device: &Device, surface_format: &TextureFormat) -> Self {
         let quad = Quad::new(device);
         let shader_bundle = ShaderBundle::new(device, surface_format, &quad.vertex_buffer_layout);
-        let start_time = Instant::now();
 
         Self {
             quad,
             shader_bundle,
-            start_time,
         }
     }
 
-    pub fn update(&mut self, queue: &mut Queue) {
-        let elapsed = self.start_time.elapsed();
-        let time_secs = elapsed.as_secs_f32();
-
-        self.shader_bundle.uniforms.update(time_secs);
+    pub fn update(
+        &mut self,
+        queue: &mut Queue,
+        new_time: f32,
+        new_zoom: f32,
+        new_offset: [f32; 2],
+    ) {
+        self.shader_bundle
+            .uniforms
+            .update(new_time, new_zoom, new_offset);
         self.shader_bundle
             .uniforms
             .write_to_gpu(queue, &self.shader_bundle.uniform_buffer);
