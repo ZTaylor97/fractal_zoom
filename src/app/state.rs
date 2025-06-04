@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use winit::dpi::PhysicalSize;
+use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::window::Window;
 
 use super::renderer::Renderer;
@@ -17,7 +17,12 @@ pub struct State<'a> {
     start_time: Instant,
     last_frame_time: Instant,
     paused_time: Duration,
-    zoom: f32,
+    pub zoom: f32,
+    pub zooming: bool,
+    pub offset: [f32; 2],
+    pub follow_mouse: bool,
+    pub mouse_click_point: PhysicalPosition<f64>,
+    pub mouse_pos: PhysicalPosition<f64>,
 }
 /// Holds all wgpu state.
 impl<'a> State<'a> {
@@ -80,6 +85,11 @@ impl<'a> State<'a> {
             last_frame_time,
             paused_time,
             zoom: 1.0,
+            zooming: false,
+            offset: [0.0, 0.0],
+            follow_mouse: false,
+            mouse_click_point: PhysicalPosition { x: 0.0, y: 0.0 },
+            mouse_pos: PhysicalPosition { x: 0.0, y: 0.0 },
         }
     }
 
@@ -92,6 +102,12 @@ impl<'a> State<'a> {
     }
 
     pub fn draw(&mut self) {
+        if self.zooming {
+            self.zoom += 0.005;
+        } else {
+            self.zoom = f32::max(self.zoom - 0.05, 1.0);
+        }
+
         let now = Instant::now();
 
         if self.paused {
@@ -104,7 +120,7 @@ impl<'a> State<'a> {
         let time_secs = elapsed.as_secs_f32();
 
         self.renderer
-            .update(&mut self.queue, time_secs, self.zoom, [0.0, 0.0]);
+            .update(&mut self.queue, time_secs, self.zoom, self.offset);
 
         let frame = match self.surface.get_current_texture() {
             Ok(frame) => frame,

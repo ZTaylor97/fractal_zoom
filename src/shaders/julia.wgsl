@@ -27,7 +27,7 @@ fn get_colour( intensity: f32) -> vec3<f32> {
    let t0: f32 = 0.0;
    let t1: f32 = 0.25;
    let t2: f32 = 0.50;
-   let t3: f32 = 0.75;
+   let t3: f32 = 0.85;
    let t4: f32 = 1.0;
 
     let c0 = vec3(0.0, 0.0, 0.0);
@@ -54,13 +54,23 @@ fn get_colour( intensity: f32) -> vec3<f32> {
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
     // Map UV from [0, 1] to [-1.5, 1.5] and [-1.0, 1.0]
-    let bound_x = 1.5 / uniforms.zoom;
-    let bound_y = 1.5 / uniforms.zoom;
+    // let zoom = pow(1.2, uniforms.zoom);
+    // let bound_x = f32(1.5 / zoom);
+    // let bound_y = f32(1.5 / zoom);
 
-    let z = vec2<f32>(
-        mix(-bound_x + uniforms.offset.x, bound_x + uniforms.offset.x, vertex_out.uv.x),
-        mix(-bound_y + uniforms.offset.y, bound_y + uniforms.offset.y, vertex_out.uv.y)
-    );
+    // let offset = vec2<f32>(uniforms.offset.x, uniforms.offset.y);
+
+    // let z = vec2<f32>(
+    //     mix(-bound_x, bound_x, vertex_out.uv.x + offset.x),
+    //     mix(-bound_y, bound_y, vertex_out.uv.y - offset.y)
+    // );
+
+    let zoom = pow(1.2, uniforms.zoom);
+    let bound_x = 1.5 / zoom;
+    let bound_y = 1.5 / zoom;
+
+    let uv = vertex_out.uv * 2.0 - vec2(1.0, 1.0);
+    let z = uv * vec2(bound_x, bound_y) - vec2(uniforms.offset.x, -uniforms.offset.y);
 
     let c = vec2<f32>(
         0.7885 * cos(uniforms.time * 0.05),
@@ -69,8 +79,9 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
 
     var value = z;
     var i = 0u;
+    let iterations = u32(100 + 100 * zoom);
     loop {
-        if (i >= 255u || dot(value, value) > 4.0) {
+        if (i >= iterations || dot(value, value) > 4.0) {
             break;
         }
         value = vec2<f32>(
@@ -82,7 +93,7 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
 
 
     var t = f32(i) - log2(log2(dot(value,value))) + 4;
-    t = clamp(t / f32(255.0), 0.0, 1.0);
+    t = clamp(t / f32(iterations), 0.0, 1.0);
 
     let colour = get_colour(t);
     return vec4<f32>(colour, 1.0);
