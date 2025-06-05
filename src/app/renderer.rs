@@ -1,4 +1,4 @@
-use wgpu::{Device, Queue, RenderPass, TextureFormat};
+use wgpu::{Device, RenderPass, TextureFormat};
 
 use super::{quad::Quad, shader::ShaderBundle};
 

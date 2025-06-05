@@ -1,7 +1,6 @@
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 
-use winit::dpi::{PhysicalPosition, PhysicalSize};
+use winit::dpi::PhysicalSize;
 use winit::window::Window;
 
 use app_state::AppState;
@@ -12,14 +11,14 @@ use super::renderer::Renderer;
 
 mod app_state;
 pub struct State<'a> {
-    instance: wgpu::Instance,
+    _instance: wgpu::Instance,
     surface: wgpu::Surface<'a>,
-    adapter: wgpu::Adapter,
+    _adapter: wgpu::Adapter,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
-    app_state: AppState,
+    pub app_state: AppState,
     uniforms: Uniforms,
 }
 /// Holds all wgpu state.
@@ -71,9 +70,9 @@ impl<'a> State<'a> {
         let uniforms = Uniforms::new(&device);
 
         Self {
-            instance,
+            _instance: instance,
             surface,
-            adapter,
+            _adapter: adapter,
             device,
             queue,
             config,

@@ -49,6 +49,6 @@ impl AppState {
         let now = Instant::now();
 
         let elapsed = now - self.start_time - self.paused_time;
-        let time_secs = elapsed.as_secs_f32();
+        elapsed.as_secs_f32()
     }
 }

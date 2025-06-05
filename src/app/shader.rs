@@ -3,7 +3,7 @@ use wgpu::{Device, VertexBufferLayout};
 use super::uniforms;
 
 pub struct ShaderBundle {
-    pub shader: wgpu::ShaderModule,
+    pub _shader: wgpu::ShaderModule,
     pub pipeline: wgpu::RenderPipeline,
 }
 
@@ -50,6 +50,9 @@ impl ShaderBundle {
             cache: None,
         });
 
-        Self { shader, pipeline }
+        Self {
+            _shader: shader,
+            pipeline,
+        }
     }
 }

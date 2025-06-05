@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use winit::application::ApplicationHandler;
-use winit::dpi::PhysicalPosition;
 use winit::event::{ElementState, KeyEvent, MouseButton, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::{KeyCode, PhysicalKey};
@@ -72,10 +71,10 @@ impl ApplicationHandler for App<'_> {
                 if let Some(app_state) = self.state.as_mut() {
                     match (key, state) {
                         (KeyCode::Space, ElementState::Pressed) => {
-                            app_state.paused = true;
+                            app_state.app_state.paused = true;
                         }
                         (KeyCode::Space, ElementState::Released) => {
-                            app_state.paused = false;
+                            app_state.app_state.paused = false;
                         }
                         _ => (),
                     }
@@ -85,18 +84,20 @@ impl ApplicationHandler for App<'_> {
                 if let Some(app_state) = self.state.as_mut() {
                     let size = self.window.as_ref().unwrap().inner_size();
 
-                    if app_state.follow_mouse {
-                        let old_pos = app_state.mouse_pos;
+                    if app_state.app_state.follow_mouse {
+                        let old_pos = app_state.app_state.mouse_pos;
                         let new_pos = position;
 
                         let diff_x = ((new_pos.x - old_pos.x) / size.width as f64) as f32;
                         let diff_y = ((new_pos.y - old_pos.y) / size.height as f64) as f32;
-                        app_state.offset[0] += diff_x * 2.0 * 1.5 / app_state.zoom;
-                        app_state.offset[1] += diff_y * 2.0 * 1.5 / app_state.zoom;
+                        app_state.app_state.offset[0] +=
+                            diff_x * 2.0 * 1.5 / app_state.app_state.zoom;
+                        app_state.app_state.offset[1] +=
+                            diff_y * 2.0 * 1.5 / app_state.app_state.zoom;
                     }
 
                     // update mouse pos only after calculations are done
-                    app_state.mouse_pos = position;
+                    app_state.app_state.mouse_pos = position;
                 }
             }
             WindowEvent::MouseInput { state, button, .. } => {
@@ -104,15 +105,16 @@ impl ApplicationHandler for App<'_> {
                     match button {
                         MouseButton::Left => match state {
                             ElementState::Pressed => {
-                                app_state.mouse_click_point = app_state.mouse_pos;
-                                app_state.follow_mouse = true;
+                                app_state.app_state.mouse_click_point =
+                                    app_state.app_state.mouse_pos;
+                                app_state.app_state.follow_mouse = true;
                             }
                             ElementState::Released => {
-                                app_state.follow_mouse = false;
+                                app_state.app_state.follow_mouse = false;
                             }
                         },
                         MouseButton::Right => {
-                            app_state.zooming = state == ElementState::Pressed;
+                            app_state.app_state.zooming = state == ElementState::Pressed;
                         }
                         MouseButton::Middle => todo!(),
                         MouseButton::Back => todo!(),
@@ -125,11 +127,11 @@ impl ApplicationHandler for App<'_> {
         }
     }
 
-    fn suspended(&mut self, event_loop: &ActiveEventLoop) {
+    fn suspended(&mut self, _event_loop: &ActiveEventLoop) {
         println!("App suspended");
     }
 
-    fn exiting(&mut self, event_loop: &ActiveEventLoop) {
+    fn exiting(&mut self, _event_loop: &ActiveEventLoop) {
         println!("App exiting");
     }
 }
