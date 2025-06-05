@@ -116,10 +116,7 @@ impl ApplicationHandler for App<'_> {
                         MouseButton::Right => {
                             app_state.app_state.zooming = state == ElementState::Pressed;
                         }
-                        MouseButton::Middle => todo!(),
-                        MouseButton::Back => todo!(),
-                        MouseButton::Forward => todo!(),
-                        MouseButton::Other(_) => todo!(),
+                        _ => (),
                     }
                 }
             }
