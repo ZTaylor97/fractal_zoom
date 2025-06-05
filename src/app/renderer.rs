@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use wgpu::{Device, Queue, RenderPass, TextureFormat};
 
 use super::{quad::Quad, shader::ShaderBundle};
@@ -20,26 +18,11 @@ impl Renderer {
         }
     }
 
-    pub fn update(
-        &mut self,
-        queue: &mut Queue,
-        new_time: f32,
-        new_zoom: f32,
-        new_offset: [f32; 2],
-    ) {
-        self.shader_bundle
-            .uniforms
-            .update(new_time, new_zoom, new_offset);
-        self.shader_bundle
-            .uniforms
-            .write_to_gpu(queue, &self.shader_bundle.uniform_buffer);
-    }
-
-    pub fn draw(&self, render_pass: &mut RenderPass) {
+    pub fn draw(&self, render_pass: &mut RenderPass, uniform_bind_group: &wgpu::BindGroup) {
         // set shader
         render_pass.set_pipeline(&self.shader_bundle.pipeline);
         // set buffers
-        render_pass.set_bind_group(0, &self.shader_bundle.uniform_bind_group, &[]);
+        render_pass.set_bind_group(0, uniform_bind_group, &[]);
 
         // Draw the quad
         render_pass.set_vertex_buffer(0, self.quad.vertex_buffer.slice(..));

@@ -53,17 +53,7 @@ fn get_colour( intensity: f32) -> vec3<f32> {
 
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
-    // Map UV from [0, 1] to [-1.5, 1.5] and [-1.0, 1.0]
-    // let zoom = pow(1.2, uniforms.zoom);
-    // let bound_x = f32(1.5 / zoom);
-    // let bound_y = f32(1.5 / zoom);
 
-    // let offset = vec2<f32>(uniforms.offset.x, uniforms.offset.y);
-
-    // let z = vec2<f32>(
-    //     mix(-bound_x, bound_x, vertex_out.uv.x + offset.x),
-    //     mix(-bound_y, bound_y, vertex_out.uv.y - offset.y)
-    // );
 
     let zoom = pow(1.2, uniforms.zoom);
     let bound_x = 1.5 / zoom;
@@ -93,7 +83,10 @@ fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
 
 
     var t = f32(i) - log2(log2(dot(value,value))) + 4;
-    t = clamp(t / f32(iterations), 0.0, 1.0);
+    let max_iter = 1000.0;
+    t = clamp(t / max_iter, 0.0, 1.0);
+    t = pow(t, 0.6); // optional contrast enhancement
+
 
     let colour = get_colour(t);
     return vec4<f32>(colour, 1.0);

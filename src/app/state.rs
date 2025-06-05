@@ -4,7 +4,13 @@ use std::time::{Duration, Instant};
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::window::Window;
 
+use app_state::AppState;
+
+use crate::app::uniforms::Uniforms;
+
 use super::renderer::Renderer;
+
+mod app_state;
 pub struct State<'a> {
     instance: wgpu::Instance,
     surface: wgpu::Surface<'a>,
@@ -13,16 +19,8 @@ pub struct State<'a> {
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
-    pub paused: bool,
-    start_time: Instant,
-    last_frame_time: Instant,
-    paused_time: Duration,
-    pub zoom: f32,
-    pub zooming: bool,
-    pub offset: [f32; 2],
-    pub follow_mouse: bool,
-    pub mouse_click_point: PhysicalPosition<f64>,
-    pub mouse_pos: PhysicalPosition<f64>,
+    app_state: AppState,
+    uniforms: Uniforms,
 }
 /// Holds all wgpu state.
 impl<'a> State<'a> {
@@ -67,10 +65,10 @@ impl<'a> State<'a> {
         surface.configure(&device, &config);
 
         let renderer = Renderer::new(&device, &surface_format);
-        let now = Instant::now();
-        let start_time = now;
-        let paused_time = Duration::ZERO;
-        let last_frame_time = now;
+
+        let app_state = AppState::new();
+
+        let uniforms = Uniforms::new(&device);
 
         Self {
             instance,
@@ -80,16 +78,8 @@ impl<'a> State<'a> {
             queue,
             config,
             renderer,
-            paused: false,
-            start_time,
-            last_frame_time,
-            paused_time,
-            zoom: 1.0,
-            zooming: false,
-            offset: [0.0, 0.0],
-            follow_mouse: false,
-            mouse_click_point: PhysicalPosition { x: 0.0, y: 0.0 },
-            mouse_pos: PhysicalPosition { x: 0.0, y: 0.0 },
+            app_state,
+            uniforms,
         }
     }
 
@@ -102,25 +92,20 @@ impl<'a> State<'a> {
     }
 
     pub fn draw(&mut self) {
-        if self.zooming {
-            self.zoom += 0.005;
+        self.app_state.update();
+
+        if self.app_state.zooming {
+            self.app_state.zoom += 0.005;
         } else {
-            self.zoom = f32::max(self.zoom - 0.05, 1.0);
+            self.app_state.zoom = f32::max(self.app_state.zoom - 0.05, 1.0);
         }
 
-        let now = Instant::now();
-
-        if self.paused {
-            self.paused_time += now - self.last_frame_time;
-        }
-
-        self.last_frame_time = now;
-
-        let elapsed = now - self.start_time - self.paused_time;
-        let time_secs = elapsed.as_secs_f32();
-
-        self.renderer
-            .update(&mut self.queue, time_secs, self.zoom, self.offset);
+        self.uniforms.update(
+            &mut self.queue,
+            self.app_state.elapsed_time(),
+            self.app_state.zoom,
+            self.app_state.offset,
+        );
 
         let frame = match self.surface.get_current_texture() {
             Ok(frame) => frame,
@@ -156,7 +141,8 @@ impl<'a> State<'a> {
                 occlusion_query_set: None,
             });
 
-            self.renderer.draw(&mut rpass);
+            self.renderer
+                .draw(&mut rpass, &self.uniforms.uniform_bind_group);
         }
 
         self.queue.submit(Some(encoder.finish()));

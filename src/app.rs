@@ -16,8 +16,6 @@ mod vertex;
 
 use state::State;
 
-use crate::app;
-
 #[derive(Default)]
 pub struct App<'a> {
     window: Option<Arc<Window>>,
@@ -93,10 +91,8 @@ impl ApplicationHandler for App<'_> {
 
                         let diff_x = ((new_pos.x - old_pos.x) / size.width as f64) as f32;
                         let diff_y = ((new_pos.y - old_pos.y) / size.height as f64) as f32;
-                        app_state.offset[0] += diff_x;
-                        app_state.offset[1] += diff_y;
-
-                        println!("{diff_x}, {diff_y}");
+                        app_state.offset[0] += diff_x * 2.0 * 1.5 / app_state.zoom;
+                        app_state.offset[1] += diff_y * 2.0 * 1.5 / app_state.zoom;
                     }
 
                     // update mouse pos only after calculations are done
