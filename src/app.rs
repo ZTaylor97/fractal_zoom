@@ -73,7 +73,7 @@ impl ApplicationHandler for App<'_> {
                         (KeyCode::Space, ElementState::Pressed) => {
                             app_state.app_state.paused = true;
                         }
-                        (KeyCode::Space, ElementState::Released) => {
+                        (KeyCode::Enter, ElementState::Pressed) => {
                             app_state.app_state.paused = false;
                         }
                         _ => (),
