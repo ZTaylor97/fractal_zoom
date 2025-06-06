@@ -4,7 +4,7 @@ use winit::dpi::PhysicalPosition;
 
 pub struct AppState {
     pub paused: bool,
-    start_time: Instant,
+    pub start_time: Instant,
     last_frame_time: Instant,
     paused_time: Duration,
     pub zoom: f32,
@@ -13,6 +13,7 @@ pub struct AppState {
     pub follow_mouse: bool,
     pub mouse_click_point: PhysicalPosition<f64>,
     pub mouse_pos: PhysicalPosition<f64>,
+    pub bundle_idx: usize,
 }
 
 impl AppState {
@@ -32,6 +33,7 @@ impl AppState {
             follow_mouse: false,
             mouse_click_point: PhysicalPosition { x: 0.0, y: 0.0 },
             mouse_pos: PhysicalPosition { x: 0.0, y: 0.0 },
+            bundle_idx: 0,
         }
     }
 

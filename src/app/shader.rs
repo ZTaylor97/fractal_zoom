@@ -1,4 +1,4 @@
-use wgpu::{Device, VertexBufferLayout};
+use wgpu::{Device, ShaderModuleDescriptor, VertexBufferLayout};
 
 use super::uniforms;
 
@@ -12,9 +12,9 @@ impl ShaderBundle {
         device: &Device,
         surface_format: &wgpu::TextureFormat,
         buffer_layout: &VertexBufferLayout,
+        shader_module_descriptor: ShaderModuleDescriptor,
     ) -> Self {
-        // let shader = device.create_shader_module(wgpu::include_wgsl!("../shaders/mandelbrot.wgsl"));
-        let shader = device.create_shader_module(wgpu::include_wgsl!("../shaders/julia.wgsl"));
+        let shader = device.create_shader_module(shader_module_descriptor);
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Fractal shader layout"),
             bind_group_layouts: &[&uniforms::UniformData::bind_group_layout(&device)],

@@ -4,23 +4,41 @@ use super::{quad::Quad, shader::ShaderBundle};
 
 pub struct Renderer {
     quad: Quad,
-    shader_bundle: ShaderBundle,
+    shader_bundles: Vec<ShaderBundle>,
 }
 
 impl Renderer {
     pub fn new(device: &Device, surface_format: &TextureFormat) -> Self {
         let quad = Quad::new(device);
-        let shader_bundle = ShaderBundle::new(device, surface_format, &quad.vertex_buffer_layout);
+        let shader_bundles = vec![
+            ShaderBundle::new(
+                device,
+                surface_format,
+                &quad.vertex_buffer_layout,
+                wgpu::include_wgsl!("../shaders/mandelbrot.wgsl"),
+            ),
+            ShaderBundle::new(
+                device,
+                surface_format,
+                &quad.vertex_buffer_layout,
+                wgpu::include_wgsl!("../shaders/julia.wgsl"),
+            ),
+        ];
 
         Self {
             quad,
-            shader_bundle,
+            shader_bundles,
         }
     }
 
-    pub fn draw(&self, render_pass: &mut RenderPass, uniform_bind_group: &wgpu::BindGroup) {
+    pub fn draw(
+        &self,
+        render_pass: &mut RenderPass,
+        uniform_bind_group: &wgpu::BindGroup,
+        bundle_idx: usize,
+    ) {
         // set shader
-        render_pass.set_pipeline(&self.shader_bundle.pipeline);
+        render_pass.set_pipeline(&self.shader_bundles[bundle_idx].pipeline);
         // set buffers
         render_pass.set_bind_group(0, uniform_bind_group, &[]);
 

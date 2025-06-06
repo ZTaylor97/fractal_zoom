@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::Instant;
 
 use winit::application::ApplicationHandler;
 use winit::event::{ElementState, KeyEvent, MouseButton, WindowEvent};
@@ -75,6 +76,14 @@ impl ApplicationHandler for App<'_> {
                         }
                         (KeyCode::Enter, ElementState::Pressed) => {
                             app_state.app_state.paused = false;
+                        }
+                        (KeyCode::Digit1, ElementState::Pressed) => {
+                            app_state.app_state.bundle_idx = 0;
+                            app_state.app_state.start_time = Instant::now();
+                        }
+                        (KeyCode::Digit2, ElementState::Pressed) => {
+                            app_state.app_state.bundle_idx = 1;
+                            app_state.app_state.start_time = Instant::now();
                         }
                         _ => (),
                     }

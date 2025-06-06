@@ -80,7 +80,7 @@ impl RenderState<'_> {
         self.surface.get_current_texture()
     }
 
-    pub fn draw(&mut self, uniform_bind_group: &BindGroup) {
+    pub fn draw(&mut self, uniform_bind_group: &BindGroup, bundle_idx: usize) {
         let frame = if let Ok(frame) = self.get_frame() {
             frame
         } else {
@@ -113,7 +113,8 @@ impl RenderState<'_> {
                 occlusion_query_set: None,
             });
 
-            self.renderer.draw(&mut rpass, uniform_bind_group);
+            self.renderer
+                .draw(&mut rpass, uniform_bind_group, bundle_idx);
         }
 
         self.queue.submit(Some(encoder.finish()));

@@ -52,6 +52,7 @@ impl<'a> State<'a> {
             self.app_state.offset,
         );
 
-        self.render_state.draw(&self.uniforms.uniform_bind_group);
+        self.render_state
+            .draw(&self.uniforms.uniform_bind_group, self.app_state.bundle_idx);
     }
 }
