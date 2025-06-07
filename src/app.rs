@@ -79,11 +79,15 @@ impl ApplicationHandler for App<'_> {
                         }
                         (KeyCode::Digit1, ElementState::Pressed) => {
                             app_state.app_state.bundle_idx = 0;
-                            app_state.app_state.start_time = Instant::now();
+                            app_state.app_state.reset_time();
                         }
                         (KeyCode::Digit2, ElementState::Pressed) => {
                             app_state.app_state.bundle_idx = 1;
-                            app_state.app_state.start_time = Instant::now();
+                            app_state.app_state.reset_time();
+                        }
+                        (KeyCode::Digit3, ElementState::Pressed) => {
+                            app_state.app_state.bundle_idx = 2;
+                            app_state.app_state.reset_time();
                         }
                         _ => (),
                     }

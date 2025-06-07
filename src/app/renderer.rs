@@ -2,6 +2,11 @@ use wgpu::{Device, RenderPass, TextureFormat};
 
 use super::{quad::Quad, shader::ShaderBundle};
 
+pub enum ShaderVariant {
+    Mandelbrot,
+    Julia,
+}
+
 pub struct Renderer {
     quad: Quad,
     shader_bundles: Vec<ShaderBundle>,
@@ -22,6 +27,12 @@ impl Renderer {
                 surface_format,
                 &quad.vertex_buffer_layout,
                 wgpu::include_wgsl!("../shaders/julia.wgsl"),
+            ),
+            ShaderBundle::new(
+                device,
+                surface_format,
+                &quad.vertex_buffer_layout,
+                wgpu::include_wgsl!("../shaders/nova.wgsl"),
             ),
         ];
 

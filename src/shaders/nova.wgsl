@@ -53,39 +53,58 @@ fn get_colour( intensity: f32) -> vec3<f32> {
 
 @fragment
 fn fs_main(vertex_out: VertexOut) -> @location(0) vec4<f32> {
-
-
     let zoom = pow(1.2, uniforms.zoom);
     let bound_x = 1.5 / zoom;
     let bound_y = 1.5 / zoom;
 
     let uv = vertex_out.uv * 2.0 - vec2(1.0, 1.0);
-    let z = uv * vec2(bound_x, bound_y) - vec2(uniforms.offset.x, -uniforms.offset.y);
+    var z = uv * vec2(bound_x, bound_y) - vec2(uniforms.offset.x, -uniforms.offset.y);
 
+    // Small perturbation constant to animate over time
     let c = vec2<f32>(
-        0.7885 * cos(uniforms.time * 0.05),
-        0.7885 * sin(uniforms.time * 0.05)
+        0.3 * cos(uniforms.time * 0.2),
+        0.3 * sin(uniforms.time * 0.35)
     );
 
-    var value = z;
     var i = 0u;
-    let iterations = clamp(u32(100 + 100 * zoom), 0, 1000);
+    let max_iter = clamp(u32(100 + 100 * zoom), 0, 1000);
     loop {
-        if (i >= iterations || dot(value, value) > 4.0) {
+        if (i >= max_iter) {
             break;
         }
-        value = vec2<f32>(
-            value.x * value.x - value.y * value.y + c.x,
-            2 * value.x * value.y + c.y
+
+        // f(z) = z^3 - 1
+        let r2 = z.x * z.x - z.y * z.y;
+        let i2 = 2.0 * z.x * z.y;
+        let fz = vec2<f32>(
+            r2 * z.x - 3.0 * z.x * z.y * z.y - 1.0,
+            3.0 * z.x * z.x * z.y - z.y * z.y * z.y
         );
-        i = i + 1u;
+
+        // f'(z) = 3z^2
+        let dfz = vec2<f32>(
+            3.0 * (z.x * z.x - z.y * z.y),
+            6.0 * z.x * z.y
+        );
+
+        // z = z - f(z)/f'(z) + c
+        let denom = dot(dfz, dfz) + 1e-6;
+        let correction = vec2<f32>(
+            (fz.x * dfz.x + fz.y * dfz.y) / denom,
+            (fz.y * dfz.x - fz.x * dfz.y) / denom
+        );
+
+        z = z - correction + c;
+
+        if (dot(fz, fz) < 1e-6) {
+            break;
+        }
+
+        i += 1u;
     }
 
-
-    var t = f32(i) - log2(log2(dot(value,value))) + 4;
-    let max_iter = 1000.0;
-    t = clamp(t / max_iter, 0.0, 1.0);
-    t = pow(t, 0.6); // optional contrast enhancement
+    var t = f32(i) - log2(log2(dot(z,z) + 1e-6)) + 4.0;
+    t = clamp(t / f32(max_iter), 0.0, 1.0);
 
 
     let colour = get_colour(t);

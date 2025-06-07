@@ -53,4 +53,13 @@ impl AppState {
         let elapsed = now - self.start_time - self.paused_time;
         elapsed.as_secs_f32()
     }
+
+    pub fn reset_time(&mut self) {
+        let now = Instant::now();
+        self.start_time = now;
+        self.last_frame_time = now;
+        self.paused_time = Duration::ZERO;
+        self.paused = false;
+        self.offset = [0.0, 0.0];
+    }
 }
